@@ -1,6 +1,6 @@
 # uil_app
 
-A new Flutter project.
+Project to create a Mobile Application to help people study for UIL. Current working on CS, but more subjects may be added.
 
 ## Getting Started
 
