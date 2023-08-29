@@ -2,6 +2,8 @@
 
 Project to create a Mobile Application to help people study for UIL. Current working on CS, but more subjects may be added.
 
+![Screenshot](images/postfix.png)
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

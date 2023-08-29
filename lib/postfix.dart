@@ -26,9 +26,10 @@ double? Postsolution(String eq) {
       case '/':
         double val2 = stack.pop();
         double val1 = stack.pop();
+        if (val2 == 0.0) {
+          return null;
+        }
         double div = division(val1, val2);
-        print('$val1 / $val2');
-        print(div != div.round());
         if (div != div.round()) {
           return null;
         }
@@ -37,9 +38,14 @@ double? Postsolution(String eq) {
         double val2 = stack.pop();
         double val1 = stack.pop();
         double exp = exponent(val1, val2);
-        print('$val1 ^ $val2');
-        print(exp > 81.0);
-        if (exp > 81.0) {
+        print(exp);
+        if (exp > 81.0 ||
+            exp < -81.0 ||
+            exp == double.infinity ||
+            exp == 0.0 ||
+            exp == double.negativeInfinity ||
+            exp != exp ||
+            exp != exp.round()) {
           return null;
         }
         stack.push(exp);
@@ -78,9 +84,10 @@ double? Presolution(String eq) {
       case '/':
         double val1 = stack.pop();
         double val2 = stack.pop();
+        if (val2 == 0.0) {
+          return null;
+        }
         double div = division(val1, val2);
-        print('$val1 / $val2');
-        print(div != div.round());
         if (div != div.round()) {
           return null;
         }
@@ -89,7 +96,13 @@ double? Presolution(String eq) {
         double val1 = stack.pop();
         double val2 = stack.pop();
         double exp = exponent(val1, val2);
-        if (exp > 81) {
+        if (exp > 81 ||
+            exp < -81.0 ||
+            exp == double.infinity ||
+            exp == 0.0 ||
+            exp == double.negativeInfinity ||
+            exp != exp ||
+            exp != exp.round()) {
           return null;
         }
         stack.push(exp);
@@ -97,7 +110,6 @@ double? Presolution(String eq) {
         stack.push(double.parse(val));
     }
   }
-
   double result = stack.pop();
   return result;
 }
@@ -133,8 +145,45 @@ String postEquationGenerator({int operators = 4}) {
     }
   }
   double? post = Postsolution(equation);
+  print(equation);
   if (post == null || post == 0.0 || post != Postsolution(equation)!.round()) {
     equation = postEquationGenerator(operators: operators);
+  }
+  return equation;
+}
+
+String preEquationGenerator({int operators = 4}) {
+  int numOfOps = 1;
+  int numOfNum = 0;
+  String equation = '';
+  Random rand = Random();
+  List<String> ops = ['+', '-', '*', '/', '^'];
+
+  equation += '${ops[rand.nextInt(ops.length)]}';
+  while (numOfNum != operators + 1) {
+    if (numOfOps == operators) {
+      //Operator
+      equation += ' ${rand.nextInt(10) + 1}';
+      numOfNum++;
+    } else if (numOfNum == numOfOps) {
+      //Number
+      equation += ' ${ops[rand.nextInt(ops.length)]}';
+      numOfOps++;
+    } else {
+      //Number or Operator
+      int val = rand.nextInt(10);
+      if (val <= 6) {
+        equation += ' ${rand.nextInt(10) + 1}';
+        numOfNum++;
+      } else {
+        equation += ' ${ops[rand.nextInt(ops.length)]}';
+        numOfOps++;
+      }
+    }
+  }
+  double? post = Presolution(equation);
+  if (post == null || post == 0.0 || post != Presolution(equation)!.round()) {
+    equation = preEquationGenerator(operators: operators);
   }
   return equation;
 }

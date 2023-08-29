@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_switch/flutter_switch.dart';
+import 'package:numberpicker/numberpicker.dart';
 import 'package:provider/provider.dart';
 import 'postfix.dart';
 
@@ -38,12 +40,6 @@ class MyAppState extends ChangeNotifier {
   var counter = 0;
   void incrementCounter() {
     counter++;
-    notifyListeners();
-  }
-
-  String sol = '';
-  void solut(String value) {
-    sol = Postsolution(value)!.round().toString();
     notifyListeners();
   }
 }
@@ -153,17 +149,16 @@ class _CounterState extends State<Counter> {
             'You have pushed the button this many times:',
           ),
           Text(
-            '${counter}',
+            '$counter',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
-          Container(
-              child: FloatingActionButton(
+          FloatingActionButton(
             onPressed: () {
               appState.incrementCounter();
             },
             tooltip: 'Increment',
             child: const Icon(Icons.add),
-          ))
+          )
         ],
       ),
     );
@@ -178,29 +173,112 @@ class Postfix extends StatefulWidget {
 }
 
 class _PostfixState extends State<Postfix> {
+  var sol = '';
+  String eq = '';
+  final myController = TextEditingController();
+  Color backgroundColor = Colors.white;
+  bool post = true;
+  int ops = 4;
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var sol = appState.sol;
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Text('Equation: ${postEquationGenerator(operators: 3)}'),
-          Text(
-            'Solution: $sol',
-          ),
-          Padding(padding: const EdgeInsets.all(8)),
-          TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Equation',
+      child: Container(
+        decoration: BoxDecoration(color: backgroundColor),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Text('Operators'),
+            NumberPicker(
+                minValue: 1,
+                maxValue: 8,
+                value: ops,
+                haptics: true,
+                onChanged: (value) => setState(() => ops = value)),
+            FlutterSwitch(
+                width: 125,
+                height: 75.0,
+                toggleSize: 60.0,
+                value: post,
+                activeIcon: Text("PostFix"),
+                inactiveIcon: Text("PreFix"),
+                onToggle: (val) {
+                  setState(() {
+                    post = val;
+                  });
+                }),
+            Padding(padding: const EdgeInsets.all(30)),
+            Text(
+              'Equation:\n$eq',
+              textScaleFactor: 1.75,
             ),
-            onSubmitted: (String value) {
-              appState.solut(value);
-            },
-          ),
-        ],
+            Padding(padding: const EdgeInsets.all(8)),
+            TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Answer',
+              ),
+              controller: myController,
+            ),
+            ButtonBar(
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        backgroundColor = Colors.white;
+                        sol = '';
+                        myController.text = '';
+                        if (post) {
+                          eq = postEquationGenerator(operators: ops);
+                        } else {
+                          eq = preEquationGenerator(operators: ops);
+                        }
+                      });
+                    },
+                    child: Text('Generate')),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (post) {
+                          sol = Postsolution(eq)!.round().toString();
+                          backgroundColor = Colors.white;
+                        } else {
+                          sol = Presolution(eq)!.round().toString();
+                          backgroundColor = Colors.white;
+                        }
+                      });
+                    },
+                    child: Text('Solution')),
+                ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (post) {
+                          if (myController.text ==
+                              Postsolution(eq)!.round().toString()) {
+                            backgroundColor = Colors.green;
+                          } else {
+                            backgroundColor = Colors.red;
+                          }
+                        } else {
+                          if (myController.text ==
+                              Presolution(eq)!.round().toString()) {
+                            backgroundColor = Colors.green;
+                          } else {
+                            backgroundColor = Colors.red;
+                          }
+                        }
+                      });
+                    },
+                    child: Text('Check Answer')),
+              ],
+            ),
+            Text(
+              'Solution: $sol',
+              textScaleFactor: 1.25,
+            ),
+            Padding(padding: const EdgeInsets.all(100))
+          ],
+        ),
       ),
     );
   }
